@@ -28,3 +28,4 @@ class Controller {
         return new $model;
     }
 }
+// Kurung kurawal ekstra di sini sudah dihapus

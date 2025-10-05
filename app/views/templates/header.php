@@ -7,10 +7,15 @@
     <link rel="stylesheet" href="<?= BASEURL; ?>/css/style.css">
 </head>
 <body>
-    <nav>
-        <div class="container">
-            <h1>Aplikasi UMKM Cerdas</h1>
-            <a href="<?= BASEURL; ?>">Home</a>
-            <a href="<?= BASEURL; ?>/kasir">Kasir</a>
+    <nav class="navbar">
+        <div class="container navbar-flex">
+            <div class="navbar-brand">
+                <img src="<?= BASEURL; ?>/images/logo.gif" alt="Logo" class="logo">
+                <span class="brand-title">UMKM Cerdas</span>
+            </div>
+            <div class="navbar-links">
+                <a href="<?= BASEURL; ?>">Home</a>
+                <a href="<?= BASEURL; ?>/kasir">Kasir</a>
+            </div>
         </div>
     </nav>

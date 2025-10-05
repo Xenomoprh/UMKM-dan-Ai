@@ -6,3 +6,4 @@ require_once '../app/init.php';
 
 // Inisialisasi framework
 $app = new App();
+// Kurung kurawal ekstra di sini sudah dihapus
