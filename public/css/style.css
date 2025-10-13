@@ -13,7 +13,8 @@ nav {
 }
 
 .container {
-    width: 80%;
+    width: 90%;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -27,6 +28,9 @@ nav a {
     text-decoration: none;
     margin-left: 15px;
     padding: 5px 10px;
+}
+
+/* Ensure the page uses column layout so footer is pushed to the bottom when content is short */
 html, body {
     height: 100%;
     margin: 0;
@@ -35,34 +39,10 @@ html, body {
     display: flex;
     flex-direction: column;
 }
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-.footer {
-    background: #4a69bd;
-    color: #fff;
-    text-align: center;
-    padding: 16px 0 10px 0;
-    font-size: 1rem;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
-    width: 100%;
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    z-index: 100;
-    margin: 0;
-}
-    background: #4a69bd;
-    color: #fff;
-    text-align: center;
-    padding: 24px 0 12px 0;
-    font-size: 1rem;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
-    flex-shrink: 0;
-    width: 100%;
-    position: relative;
-    bottom: 0;
-    left: 0;
+
+/* Main content should expand to fill available space */
+main, .content, .page-content {
+    flex: 1 0 auto;
 }
 /* Navbar modern */
 .navbar {
@@ -107,25 +87,6 @@ html, body {
     color: #4a69bd;
 }
 
-/* Footer modern */
-.footer {
-    background: #4a69bd;
-    color: #fff;
-    text-align: center;
-    padding: 24px 0 12px 0;
-    margin-top: 40px;
-    font-size: 1rem;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
-}
-.footer a {
-    color: #ffe082;
-    text-decoration: underline;
-    margin-left: 4px;
-}
-.footer a:hover {
-    color: #fff176;
-}
-}
 /* Style untuk Halaman Kasir */
 .kasir-container {
     display: flex;
