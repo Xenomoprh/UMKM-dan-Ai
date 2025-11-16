@@ -10,13 +10,12 @@ class Product_model {
         // Instansiasi class Database kita
         $this->db = new Database;
     }
-
     /**
      * Method untuk mengambil semua data produk dari database
      */
     public function getAllProducts() {
         // Menyiapkan query
-        $this->db->query('SELECT * FROM ' . $this->table);
+        $this->db->query('SELECT * FROM ' . $this->table . ' ORDER BY kategori, product_name');
         // Eksekusi dan kembalikan hasilnya
         return $this->db->resultSet();
     }

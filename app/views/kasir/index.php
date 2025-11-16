@@ -1,22 +1,56 @@
 <?php require_once '../app/views/templates/header.php'; ?>
 
 <div class="container content">
-    <h2>Halaman Kasir</h2>
     <div class="kasir-container">
-        <div class="product-list">
-            <h3>Daftar Produk</h3>
-            <?php foreach ($data['products'] as $product) : ?>
-                <div class="product-item">
-                    <span><?= $product['product_name']; ?></span>
-                    <span>Rp <?= number_format($product['price']); ?></span>
-                    <button class="add-to-cart-btn" 
-                            data-id="<?= $product['product_id']; ?>"
-                            data-name="<?= $product['product_name']; ?>"
-                            data-price="<?= $product['price']; ?>">
-                        Tambah
-                    </button>
+        <div class="product-grid-container">
+            
+            <h3>Jajanan & Makanan</h3>
+            <div class="product-grid">
+                <?php foreach ($data['makanan'] as $product) : ?>
+                    <div class="product-card add-to-cart-btn" 
+                         data-id="<?= $product['product_id']; ?>"
+                         data-name="<?= $product['product_name']; ?>"
+                         data-price="<?= $product['price']; ?>">
+                        
+                        <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                        <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                        <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <h3 class="mt-4">Minuman</h3>
+            <div class="product-grid">
+                <?php foreach ($data['minuman'] as $product) : ?>
+                    <div class="product-card add-to-cart-btn" 
+                         data-id="<?= $product['product_id']; ?>"
+                         data-name="<?= $product['product_name']; ?>"
+                         data-price="<?= $product['price']; ?>">
+                        
+                        <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                        <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                        <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if (!empty($data['lainnya'])) : ?>
+                <h3 class="mt-4">Lainnya</h3>
+                <div class="product-grid">
+                    <?php foreach ($data['lainnya'] as $product) : ?>
+                        <div class="product-card add-to-cart-btn" 
+                             data-id="<?= $product['product_id']; ?>"
+                             data-name="<?= $product['product_name']; ?>"
+                             data-price="<?= $product['price']; ?>">
+                            
+                            <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                            <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                            <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
-            <?php endforeach; ?>
+            <?php endif; ?>
+
         </div>
 
         <div class="cart">
