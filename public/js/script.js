@@ -11,16 +11,45 @@ document.addEventListener('DOMContentLoaded', function () {
     // ====================================================================
     const kasirContainer = document.querySelector('.kasir-container');
     if (kasirContainer) {
-        // (Kode kasir Anda yang sudah berfungsi tetap di sini, tidak ada perubahan)
+        // --- Ambil Elemen ---
         const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
         const cartItemsContainer = document.getElementById('cart-items');
         const cartTotalElement = document.getElementById('cart-total');
+        const paymentAmountInput = document.getElementById('payment-amount'); 
+        const changeDisplayElement = document.getElementById('change-display');
+        const totalItemsElement = document.getElementById('total-items');
+        const clearCartButton = document.getElementById('btn-clear-cart');
 
-        if (!cartItemsContainer || !cartTotalElement) {
-            console.error('Elemen keranjang kasir tidak ditemukan!');
+        if (!cartItemsContainer || !cartTotalElement || !paymentAmountInput || !changeDisplayElement) {
+            console.error('Elemen kasir (keranjang/pembayaran) tidak ditemukan!');
         } else {
             let cart = {}; 
+            let currentTotal = 0; 
 
+            // --- Fungsi Kalkulator ---
+            function calculateChange() {
+                const payment = parseFloat(paymentAmountInput.value) || 0;
+                
+                if (payment === 0) {
+                    changeDisplayElement.innerText = 'Rp 0';
+                    return;
+                }
+
+                const change = payment - currentTotal;
+
+                if (change < 0) {
+                    changeDisplayElement.innerText = `Rp ${number_format(Math.abs(change))} (KURANG)`;
+                    changeDisplayElement.style.color = '#e74c3c';
+                } else {
+                    changeDisplayElement.innerText = `Rp ${number_format(change)}`;
+                    changeDisplayElement.style.color = '#27ae60';
+                }
+            }
+
+            // --- Event Listener untuk Input Pembayaran ---
+            paymentAmountInput.addEventListener('input', calculateChange); 
+
+            // --- Tambah ke Keranjang ---
             addToCartButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const productId = this.dataset.id;
@@ -36,9 +65,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
+            // --- Perbarui Tampilan Keranjang ---
             function updateCartView() {
                 cartItemsContainer.innerHTML = '';
-                let total = 0;
+                let total = 0; 
+                let totalItems = 0;
                 let hasItems = false;
 
                 for (const productId in cart) {
@@ -46,169 +77,200 @@ document.addEventListener('DOMContentLoaded', function () {
                     const item = cart[productId];
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
+                    totalItems += item.quantity;
 
                     const cartItemElement = document.createElement('div');
                     cartItemElement.className = 'cart-item';
                     cartItemElement.innerHTML = `
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-controls">
-                            <button class="quantity-btn minus-btn" data-id="${productId}">-</button>
-                            <input type="number" class="quantity-input" value="${item.quantity}" min="1" data-id="${productId}">
-                            <button class="quantity-btn plus-btn" data-id="${productId}">+</button>
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-qty">@ Rp ${number_format(item.price)}</div>
+                            <div class="cart-item-controls">
+                                <button class="qty-btn qty-minus" data-id="${productId}" title="Kurangi jumlah">−</button>
+                                <input type="number" class="qty-input" value="${item.quantity}" min="1" data-id="${productId}" title="Masukkan jumlah">
+                                <button class="qty-btn qty-plus" data-id="${productId}" title="Tambah jumlah">+</button>
+                            </div>
                         </div>
                         <div class="cart-item-price">Rp ${number_format(itemTotal)}</div>
+                        <button class="cart-item-remove" data-id="${productId}" title="Hapus dari keranjang">
+                            ✕
+                        </button>
                     `;
                     cartItemsContainer.appendChild(cartItemElement);
-                }
 
-                if (!hasItems) {
-                    cartItemsContainer.innerHTML = '<p>Keranjang masih kosong.</p>';
-                }
-
-                cartTotalElement.innerText = `Total: Rp ${number_format(total)}`;
-                addCartEventListeners();
-            }
-
-            function addCartEventListeners() {
-                document.querySelectorAll('.minus-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const productId = this.dataset.id;
-                        if (cart[productId] && cart[productId].quantity > 1) {
+                    // Event listener untuk tombol minus
+                    cartItemElement.querySelector('.qty-minus').addEventListener('click', function() {
+                        if (cart[productId].quantity > 1) {
                             cart[productId].quantity--;
                         } else {
                             delete cart[productId];
                         }
                         updateCartView();
                     });
-                });
 
-                document.querySelectorAll('.plus-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const productId = this.dataset.id;
+                    // Event listener untuk tombol plus
+                    cartItemElement.querySelector('.qty-plus').addEventListener('click', function() {
                         cart[productId].quantity++;
                         updateCartView();
                     });
-                });
 
-                document.querySelectorAll('.quantity-input').forEach(input => {
-                    input.addEventListener('change', function() {
-                        const productId = this.dataset.id;
-                        const newQuantity = parseInt(this.value);
-                        if (newQuantity > 0) {
-                            cart[productId].quantity = newQuantity;
+                    // Event listener untuk input quantity
+                    cartItemElement.querySelector('.qty-input').addEventListener('change', function() {
+                        const newQty = parseInt(this.value);
+                        if (newQty > 0) {
+                            cart[productId].quantity = newQty;
                         } else {
-                            delete cart[productId];
+                            this.value = cart[productId].quantity;
                         }
                         updateCartView();
                     });
+
+                    // Event listener untuk tombol hapus
+                    cartItemElement.querySelector('.cart-item-remove').addEventListener('click', function() {
+                        delete cart[productId];
+                        updateCartView();
+                    });
+                }
+
+                if (!hasItems) {
+                    cartItemsContainer.innerHTML = '<p class="empty-cart-message"><i data-lucide="inbox" style="width: 32px; height: 32px; display: block; margin: 0 auto 10px; opacity: 0.5;"></i>Keranjang masih kosong</p>';
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                }
+
+                // Update total items
+                if (totalItemsElement) {
+                    totalItemsElement.innerText = totalItems;
+                }
+
+                cartTotalElement.innerText = `Rp ${number_format(total)}`;
+                currentTotal = total; 
+                calculateChange();
+
+                // Recreate lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            // --- Clear Cart Button ---
+            if (clearCartButton) {
+                clearCartButton.addEventListener('click', function() {
+                    if (Object.keys(cart).length === 0) {
+                        alert('Keranjang sudah kosong!');
+                        return;
+                    }
+                    if (confirm('Yakin ingin menghapus semua item dari keranjang?')) {
+                        cart = {};
+                        paymentAmountInput.value = '';
+                        updateCartView();
+                    }
                 });
             }
 
+            // --- FUNGSI TOMBOL "BAYAR" ---
             const bayarButton = document.querySelector('.btn-bayar');
-            bayarButton.addEventListener('click', function() {
-                if (Object.keys(cart).length === 0) {
-                    alert('Keranjang masih kosong!');
-                    return;
-                }
-                fetch(BASEURL + '/kasir/prosesTransaksi', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'cart=' + JSON.stringify(cart)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    if (data.status === 'success') {
-                        cart = {};
-                        updateCartView();
+            if (bayarButton) {
+                bayarButton.addEventListener('click', function() {
+                    if (Object.keys(cart).length === 0) {
+                        alert('Keranjang masih kosong!');
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menghubungi server.');
+                    
+                    const payment = parseFloat(paymentAmountInput.value) || 0;
+                    if (payment < currentTotal) {
+                        alert('Uang pelanggan kurang!');
+                        return;
+                    }
+
+                    // Siapkan data untuk dikirim ke server
+                    const postData = new URLSearchParams();
+                    postData.append('cart', JSON.stringify(cart));
+                    postData.append('payment_received', payment);
+                    postData.append('payment_change', payment - currentTotal);
+
+                    fetch(BASEURL + '/kasir/prosesTransaksi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: postData.toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') {
+                            cart = {};
+                            paymentAmountInput.value = ''; 
+                            updateCartView(); 
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghubungi server.');
+                    });
                 });
-            });
+            }
         }
     }
 
-
     // ====================================================================
-    // LOGIKA UNTUK HALAMAN ANALISIS AI (DENGAN MEMORI)
+    // LOGIKA UNTUK HALAMAN ANALISIS AI (Tetap sama)
     // ====================================================================
     const chatForm = document.getElementById('chat-input-form');
     if (chatForm) {
+        // (Semua kode chat AI Anda yang sudah ada tetap di sini)
         const chatInput = document.getElementById('chat-input');
         const chatBox = document.getElementById('chat-box');
-        
-        // Kunci untuk menyimpan data di browser
         const CHAT_HISTORY_KEY = 'ai_chat_history';
-        let chatHistory = []; // Array untuk menyimpan semua percakapan
+        let chatHistory = []; 
 
-        // Fungsi untuk menambahkan pesan ke tampilan DOM
         function appendMessageToDOM(message, type, isTyping = false) {
             const messageWrapper = document.createElement('div');
             messageWrapper.className = `chat-message ${type}`;
             if (isTyping) messageWrapper.id = 'typing-indicator';
-            
             const messageBubble = document.createElement('div');
             messageBubble.className = 'message-bubble';
             const formattedMessage = message.replace(/\n/g, '<br>');
             messageBubble.innerHTML = `<p>${formattedMessage}</p>`;
-
             messageWrapper.appendChild(messageBubble);
             chatBox.appendChild(messageWrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Fungsi untuk menghapus indikator "sedang mengetik"
         function removeTypingIndicator() {
             const typingIndicator = document.getElementById('typing-indicator');
             if (typingIndicator) typingIndicator.remove();
         }
 
-        // Fungsi untuk menyimpan seluruh riwayat chat ke sessionStorage
         function saveHistory() {
             sessionStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatHistory));
         }
 
-        // Fungsi untuk memuat riwayat chat saat halaman dibuka
         function loadHistory() {
             const savedHistory = sessionStorage.getItem(CHAT_HISTORY_KEY);
-            
-            chatBox.innerHTML = ''; // Kosongkan chat box dulu
-
+            chatBox.innerHTML = ''; 
             if (savedHistory) {
                 chatHistory = JSON.parse(savedHistory);
-                // Gambar ulang semua chat dari riwayat
                 chatHistory.forEach(item => {
                     appendMessageToDOM(item.message, item.type);
                 });
             } else {
-                // Jika tidak ada riwayat, buat pesan selamat datang
                 const welcomeMessage = 'Halo! Saya adalah asisten AI Anda. Silakan ajukan pertanyaan, contohnya: "Produk apa yang paling laku hari ini?"';
                 chatHistory = [{ type: 'ai-message', message: welcomeMessage }];
                 appendMessageToDOM(welcomeMessage, 'ai-message');
-                saveHistory(); // Simpan pesan selamat datang sebagai awal riwayat
+                saveHistory(); 
             }
         }
 
-        // Fungsi utama saat mengirim pesan
         const sendMessage = (event) => {
             event.preventDefault();
             const userMessage = chatInput.value.trim();
             if (userMessage === '') return;
-
-            // 1. Tampilkan & simpan pesan pengguna
             appendMessageToDOM(userMessage, 'user-message');
             chatHistory.push({ type: 'user-message', message: userMessage });
             saveHistory();
-            
-            chatInput.value = ''; // Kosongkan input
-            
-            // 2. Tampilkan indikator "sedang mengetik"
+            chatInput.value = ''; 
             appendMessageToDOM('AI sedang berpikir...', 'ai-message', true);
-
-            // 3. Kirim ke server
             fetch(BASEURL + '/analisis/tanyaAi', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -217,8 +279,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 removeTypingIndicator();
-                
-                // 4. Tampilkan & simpan jawaban AI
                 appendMessageToDOM(data.answer, 'ai-message');
                 chatHistory.push({ type: 'ai-message', message: data.answer });
                 saveHistory();
@@ -232,12 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 saveHistory();
             });
         };
-
-        // Event listener untuk form submit
         chatForm.addEventListener('submit', sendMessage);
-
-        // --- INI LANGKAH KUNCINYA ---
-        // Muat riwayat chat saat halaman pertama kali dibuka
         loadHistory();
     }
 });

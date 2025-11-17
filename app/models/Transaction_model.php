@@ -12,6 +12,11 @@ class Transaction_model {
     public function simpanTransaksi($data) {
         // Data yang diterima adalah JSON dari JavaScript, ubah menjadi array PHP
         $cartData = json_decode($data['cart'], true);
+        
+        // Ambil data pembayaran baru dari $data ($_POST)
+        $paymentReceived = $data['payment_received'];
+        $paymentChange = $data['payment_change'];
+        
         $totalAmount = 0;
 
         // Hitung ulang total di sisi server untuk keamanan
@@ -23,16 +28,23 @@ class Transaction_model {
         $this->db->beginTransaction();
 
         try {
-            // 2. Simpan ke tabel 'transactions'
-            $query = "INSERT INTO transactions (total_amount) VALUES (:total)";
+            // 2. Simpan ke tabel 'transactions' (INI BAGIAN YANG DIPERBARUI)
+            $query = "INSERT INTO transactions (total_amount, payment_received, payment_change) 
+                      VALUES (:total, :payment_received, :payment_change)";
+            
             $this->db->query($query);
+            
+            // Bind semua data
             $this->db->bind('total', $totalAmount);
+            $this->db->bind('payment_received', $paymentReceived); // <-- BARIS BARU
+            $this->db->bind('payment_change', $paymentChange);   // <-- BARIS BARU
+            
             $this->db->execute();
 
             // 3. Ambil ID transaksi terakhir yang baru saja dibuat
             $transactionId = $this->db->lastInsertId();
 
-            // 4. Loop dan simpan setiap item ke tabel 'transaction_details'
+            // 4. Loop dan simpan setiap item ke tabel 'transaction_details' (Tetap sama)
             foreach ($cartData as $productId => $item) {
                 $detailQuery = "INSERT INTO transaction_details (transaction_id, product_id, quantity, subtotal) 
                                 VALUES (:trx_id, :product_id, :qty, :subtotal)";

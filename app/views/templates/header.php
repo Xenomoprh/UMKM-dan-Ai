@@ -16,7 +16,7 @@
             <div class="navbar-links">
                 <a href="<?= BASEURL; ?>">Home</a>
                 <a href="<?= BASEURL; ?>/kasir">Kasir</a>
-                <a href="<?= BASEURL; ?>/analisis">Analisis</a>
+                <a href="<?= BASEURL; ?>/analisis">Ai</a>
             </div>
         </div>
     </nav>
