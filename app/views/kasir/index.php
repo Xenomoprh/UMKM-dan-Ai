@@ -117,6 +117,15 @@
                        min="0"
                        step="1000">
                 
+                <!-- Tombol Preset Nominal -->
+                <div class="preset-amount-buttons">
+                    <button type="button" class="preset-btn" data-amount="10000">10K</button>
+                    <button type="button" class="preset-btn" data-amount="20000">20K</button>
+                    <button type="button" class="preset-btn" data-amount="50000">50K</button>
+                    <button type="button" class="preset-btn" data-amount="75000">75K</button>
+                    <button type="button" class="preset-btn" data-amount="100000">100K</button>
+                </div>
+                
                 <div class="change-display">
                     <span class="change-label">Kembalian:</span>
                     <span id="change-display" class="change-amount">Rp 0</span>
@@ -132,6 +141,35 @@
                 <i data-lucide="trash-2" style="width: 16px; height: 16px; display: inline; margin-right: 6px;"></i>
                 Bersihkan Keranjang
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Hasil Pembayaran -->
+<div id="payment-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>✓ Pembayaran Berhasil</h2>
+            <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="payment-result">
+                <div class="result-row">
+                    <span class="result-label">Total Belanja:</span>
+                    <span class="result-value" id="modal-total">Rp 0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Uang Diterima:</span>
+                    <span class="result-value" id="modal-payment">Rp 0</span>
+                </div>
+                <div class="result-row highlight">
+                    <span class="result-label">Kembalian:</span>
+                    <span class="result-value result-change" id="modal-change">Rp 0</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-ok" id="btn-modal-ok">OK</button>
         </div>
     </div>
 </div>

@@ -169,6 +169,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            // --- PRESET AMOUNT BUTTONS ---
+            const presetButtons = document.querySelectorAll('.preset-btn');
+            presetButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const amount = parseInt(this.dataset.amount);
+                    paymentAmountInput.value = amount;
+                    paymentAmountInput.dispatchEvent(new Event('input'));
+                });
+            });
+
             // --- FUNGSI TOMBOL "BAYAR" ---
             const bayarButton = document.querySelector('.btn-bayar');
             if (bayarButton) {
@@ -184,11 +194,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
+                    const changeAmount = payment - currentTotal;
+
                     // Siapkan data untuk dikirim ke server
                     const postData = new URLSearchParams();
                     postData.append('cart', JSON.stringify(cart));
                     postData.append('payment_received', payment);
-                    postData.append('payment_change', payment - currentTotal);
+                    postData.append('payment_change', changeAmount);
 
                     fetch(BASEURL + '/kasir/prosesTransaksi', {
                         method: 'POST',
@@ -197,17 +209,64 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(response => response.json())
                     .then(data => {
-                        alert(data.message);
                         if (data.status === 'success') {
+                            // Tampilkan modal dengan detail pembayaran
+                            showPaymentModal(currentTotal, payment, changeAmount);
+                            
+                            // Reset cart setelah pembayaran
                             cart = {};
                             paymentAmountInput.value = ''; 
-                            updateCartView(); 
+                            updateCartView();
+                        } else {
+                            alert(data.message || 'Pembayaran gagal!');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('Terjadi kesalahan saat menghubungi server.');
                     });
+                });
+            }
+
+            // --- FUNGSI MODAL PEMBAYARAN ---
+            function showPaymentModal(total, payment, change) {
+                const modal = document.getElementById('payment-modal');
+                const modalTotal = document.getElementById('modal-total');
+                const modalPayment = document.getElementById('modal-payment');
+                const modalChange = document.getElementById('modal-change');
+
+                if (modal && modalTotal && modalPayment && modalChange) {
+                    modalTotal.innerText = `Rp ${number_format(total)}`;
+                    modalPayment.innerText = `Rp ${number_format(payment)}`;
+                    modalChange.innerText = `Rp ${number_format(change)}`;
+                    
+                    modal.classList.remove('hidden');
+                }
+            }
+
+            // --- MODAL CLOSE EVENT ---
+            const modalCloseBtn = document.getElementById('modal-close');
+            const modalOkBtn = document.getElementById('btn-modal-ok');
+            const paymentModal = document.getElementById('payment-modal');
+
+            if (modalCloseBtn && paymentModal) {
+                modalCloseBtn.addEventListener('click', function() {
+                    paymentModal.classList.add('hidden');
+                });
+            }
+
+            if (modalOkBtn && paymentModal) {
+                modalOkBtn.addEventListener('click', function() {
+                    paymentModal.classList.add('hidden');
+                });
+            }
+
+            // Close modal saat klik di luar modal
+            if (paymentModal) {
+                paymentModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.add('hidden');
+                    }
                 });
             }
         }
