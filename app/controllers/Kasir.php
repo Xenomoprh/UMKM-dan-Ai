@@ -41,18 +41,175 @@ class Kasir extends Controller {
     }
 
     public function prosesTransaksi() {
-        // Method prosesTransaksi Anda tetap sama
+        header('Content-Type: application/json');
+        
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $transactionModel = $this->model('Transaction_model');
-            
-            if ($transactionModel->simpanTransaksi($_POST)) {
-                echo json_encode(['status' => 'success', 'message' => 'Transaksi berhasil disimpan!']);
-            } else {
-                echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan transaksi.']);
+            try {
+                $transactionModel = $this->model('Transaction_model');
+                
+                if ($transactionModel->simpanTransaksi($_POST)) {
+                    echo json_encode(['status' => 'success', 'message' => 'Transaksi berhasil disimpan!']);
+                    exit;
+                } else {
+                    echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan transaksi.']);
+                    exit;
+                }
+            } catch (Exception $e) {
+                echo json_encode(['status' => 'error', 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
             }
         } else {
             header('Location: ' . BASEURL . '/kasir');
             exit;
         }
+    }
+
+    /**
+     * API untuk menambah produk baru
+     */
+    public function addProduct() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $data = json_decode(file_get_contents("php://input"), true);
+                
+                if (empty($data['product_name']) || empty($data['kategori']) || empty($data['price'])) {
+                    echo json_encode(['status' => false, 'message' => 'Data tidak lengkap']);
+                    exit;
+                }
+                
+                $productModel = $this->model('Product_model');
+                $result = $productModel->addProduct([
+                    'product_name' => $data['product_name'],
+                    'kategori' => $data['kategori'],
+                    'price' => floatval($data['price']),
+                    'cost_of_goods' => floatval($data['cost_of_goods'] ?? 0),
+                    'stock_quantity' => intval($data['stock_quantity'] ?? 0)
+                ]);
+                
+                echo json_encode($result);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
+        exit;
+    }
+
+    /**
+     * API untuk mengubah produk
+     */
+    public function editProduct() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $data = json_decode(file_get_contents("php://input"), true);
+                
+                if (empty($data['product_id']) || empty($data['product_name']) || empty($data['kategori']) || empty($data['price'])) {
+                    echo json_encode(['status' => false, 'message' => 'Data tidak lengkap']);
+                    exit;
+                }
+                
+                $productModel = $this->model('Product_model');
+                $result = $productModel->updateProduct($data['product_id'], [
+                    'product_name' => $data['product_name'],
+                    'kategori' => $data['kategori'],
+                    'price' => floatval($data['price']),
+                    'cost_of_goods' => floatval($data['cost_of_goods'] ?? 0),
+                    'stock_quantity' => intval($data['stock_quantity'] ?? 0)
+                ]);
+                
+                echo json_encode($result);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
+        exit;
+    }
+
+    /**
+     * API untuk menghapus produk
+     */
+    public function deleteProduct() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $data = json_decode(file_get_contents("php://input"), true);
+                
+                if (empty($data['product_id'])) {
+                    echo json_encode(['status' => false, 'message' => 'ID produk tidak ditemukan']);
+                    exit;
+                }
+                
+                $productModel = $this->model('Product_model');
+                $result = $productModel->deleteProduct($data['product_id']);
+                
+                echo json_encode($result);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
+        exit;
+    }
+
+    /**
+     * API untuk mengupdate stock produk
+     */
+    public function updateStock() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $data = json_decode(file_get_contents("php://input"), true);
+                
+                if (empty($data['product_id']) || !isset($data['quantity'])) {
+                    echo json_encode(['status' => false, 'message' => 'Data tidak lengkap']);
+                    exit;
+                }
+                
+                $productModel = $this->model('Product_model');
+                $result = $productModel->updateStock($data['product_id'], $data['quantity']);
+                
+                echo json_encode($result);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
+        exit;
+    }
+
+    /**
+     * API untuk mendapatkan semua kategori
+     */
+    public function getCategories() {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            try {
+                $productModel = $this->model('Product_model');
+                $categories = $productModel->getCategories();
+                echo json_encode(['status' => true, 'data' => $categories]);
+                exit;
+            } catch (Exception $e) {
+                echo json_encode(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+        echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
+        exit;
     }
 }

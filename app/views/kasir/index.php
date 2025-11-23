@@ -9,6 +9,24 @@
     <div class="kasir-container">
         <!-- Kolom Produk -->
         <div class="product-grid-container">
+            <!-- Tombol Manage Products -->
+            <div class="manage-products-bar">
+                <button class="btn-add-product" id="btn-add-product">
+                    <i data-lucide="plus" style="width: 18px; height: 18px; display: inline; margin-right: 6px;"></i>
+                    Tambah Produk
+                </button>
+                <button class="btn-manage-categories" id="btn-manage-categories">
+                    <i data-lucide="tag" style="width: 18px; height: 18px; display: inline; margin-right: 6px;"></i>
+                    Kelola Kategori
+                </button>
+                
+                <!-- Toggle untuk Show/Hide Edit & Delete Buttons -->
+                <label class="toggle-label" title="Toggle untuk tampilkan/sembunyikan tombol edit dan delete">
+                    <input type="checkbox" id="toggle-edit-delete" class="toggle-checkbox">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">Tampilkan Edit/Delete</span>
+                </label>
+            </div>
             
             <!-- Kategori: Jajanan & Makanan -->
             <div class="category-section">
@@ -18,15 +36,25 @@
                 </div>
                 <div class="product-grid">
                     <?php foreach ($data['makanan'] as $product) : ?>
-                        <div class="product-card add-to-cart-btn" 
-                             data-id="<?= $product['product_id']; ?>"
-                             data-name="<?= $product['product_name']; ?>"
-                             data-price="<?= $product['price']; ?>"
-                             title="Klik untuk tambah ke keranjang">
-                            
-                            <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                            <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                            <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                        <div class="product-card" data-category="makanan">
+                            <div class="product-card-main add-to-cart-btn" 
+                                 data-id="<?= $product['product_id']; ?>"
+                                 data-name="<?= $product['product_name']; ?>"
+                                 data-price="<?= $product['price']; ?>"
+                                 title="Klik untuk tambah ke keranjang">
+                                
+                                <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                                <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                                <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
+                                    ✏️
+                                </button>
+                                <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -40,15 +68,25 @@
                 </div>
                 <div class="product-grid">
                     <?php foreach ($data['minuman'] as $product) : ?>
-                        <div class="product-card add-to-cart-btn" 
-                             data-id="<?= $product['product_id']; ?>"
-                             data-name="<?= $product['product_name']; ?>"
-                             data-price="<?= $product['price']; ?>"
-                             title="Klik untuk tambah ke keranjang">
-                            
-                            <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                            <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                            <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                        <div class="product-card" data-category="minuman">
+                            <div class="product-card-main add-to-cart-btn" 
+                                 data-id="<?= $product['product_id']; ?>"
+                                 data-name="<?= $product['product_name']; ?>"
+                                 data-price="<?= $product['price']; ?>"
+                                 title="Klik untuk tambah ke keranjang">
+                                
+                                <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                                <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                                <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
+                                    ✏️
+                                </button>
+                                <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -63,15 +101,25 @@
                     </div>
                     <div class="product-grid">
                         <?php foreach ($data['lainnya'] as $product) : ?>
-                            <div class="product-card add-to-cart-btn" 
-                                 data-id="<?= $product['product_id']; ?>"
-                                 data-name="<?= $product['product_name']; ?>"
-                                 data-price="<?= $product['price']; ?>"
-                                 title="Klik untuk tambah ke keranjang">
-                                
-                                <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                                <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                                <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                            <div class="product-card" data-category="lainnya">
+                                <div class="product-card-main add-to-cart-btn" 
+                                     data-id="<?= $product['product_id']; ?>"
+                                     data-name="<?= $product['product_name']; ?>"
+                                     data-price="<?= $product['price']; ?>"
+                                     title="Klik untuk tambah ke keranjang">
+                                    
+                                    <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
+                                    <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                                    <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
+                                        ✏️
+                                    </button>
+                                    <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
+                                        🗑️
+                                    </button>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -170,6 +218,80 @@
         </div>
         <div class="modal-footer">
             <button class="btn-modal-ok" id="btn-modal-ok">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add/Edit Product -->
+<div id="product-modal" class="modal hidden">
+    <div class="modal-content modal-form">
+        <div class="modal-header">
+            <h2 id="product-modal-title">Tambah Produk Baru</h2>
+            <button class="modal-close" id="product-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="product-form">
+                <input type="hidden" id="product-id" name="product_id">
+                
+                <div class="form-group">
+                    <label for="product-name">Nama Produk *</label>
+                    <input type="text" id="product-name" name="product_name" required placeholder="Masukkan nama produk">
+                </div>
+
+                <div class="form-group">
+                    <label for="product-category">Kategori *</label>
+                    <select id="product-category" name="kategori" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        <option value="Jajanan & Makanan">Jajanan & Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="product-price">Harga Jual (Rp) *</label>
+                    <input type="number" id="product-price" name="price" required placeholder="Masukkan harga jual" min="0" step="1000">
+                </div>
+
+                <div class="form-group">
+                    <label for="product-cost">Harga Modal (Rp)</label>
+                    <input type="number" id="product-cost" name="cost_of_goods" placeholder="Masukkan harga modal" min="0" step="1000">
+                </div>
+
+                <div class="form-group">
+                    <label for="product-stock">Stock Awal</label>
+                    <input type="number" id="product-stock" name="stock_quantity" placeholder="Masukkan jumlah stock" min="0" value="0">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" id="product-modal-cancel">Batal</button>
+            <button class="btn-save" id="product-modal-save">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Manage Categories -->
+<div id="category-modal" class="modal hidden">
+    <div class="modal-content modal-form">
+        <div class="modal-header">
+            <h2>Kelola Kategori</h2>
+            <button class="modal-close" id="category-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="category-list" id="category-list">
+                <!-- Akan diisi oleh JavaScript -->
+            </div>
+            <div class="form-group">
+                <label for="new-category">Tambah Kategori Baru</label>
+                <div class="add-category-input">
+                    <input type="text" id="new-category" placeholder="Nama kategori baru" maxlength="50">
+                    <button class="btn-add-category" id="btn-add-category">Tambah</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-close-modal" id="category-modal-done">Selesai</button>
         </div>
     </div>
 </div>

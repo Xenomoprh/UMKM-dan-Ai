@@ -23,18 +23,26 @@ class Database {
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $option);
         } catch(PDOException $e) {
-            die($e->getMessage());
+            throw new Exception('Database Connection Error: ' . $e->getMessage());
         }
     }
 
     // Method untuk menjalankan query
     public function query($sql) {
-        $this->stmt = $this->dbh->prepare($sql);
+        try {
+            $this->stmt = $this->dbh->prepare($sql);
+        } catch(PDOException $e) {
+            throw new Exception('Query Prepare Error: ' . $e->getMessage());
+        }
     }
 
     // Method untuk mengeksekusi statement
     public function execute() {
-        $this->stmt->execute();
+        try {
+            return $this->stmt->execute();
+        } catch(PDOException $e) {
+            throw new Exception('Execution Error: ' . $e->getMessage());
+        }
     }
 
     // Method untuk mengambil banyak hasil (array)

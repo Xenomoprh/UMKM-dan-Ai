@@ -32,18 +32,36 @@
         <?php else : ?>
             <div class="transaction-list">
                 <?php foreach ($data['today'] as $trx) : ?>
-                    <div class="trx-card">
-                        <div class="trx-left">
-                            <div class="trx-time"><?= date('H:i', strtotime($trx['transaction_time'])); ?></div>
-                            <div class="trx-id">#<?= $trx['transaction_id']; ?></div>
+                    <div class="trx-card" data-trx-id="<?= $trx['transaction_id']; ?>">
+                        <div class="trx-header" onclick="toggleTransactionDetails(this)">
+                            <div class="trx-left">
+                                <div class="trx-time"><?= date('H:i', strtotime($trx['transaction_time'])); ?></div>
+                                <div class="trx-id">#<?= $trx['transaction_id']; ?></div>
+                            </div>
+                            <div class="trx-middle">
+                                <span class="badge-success">✓ Berhasil</span>
+                            </div>
+                            <div class="trx-right">
+                                <div class="trx-amount">Rp <?= number_format($trx['total_amount']); ?></div>
+                                <div class="trx-payment text-muted">
+                                    Tunai: Rp <?= number_format($trx['payment_received']); ?>
+                                </div>
+                            </div>
+                            <div class="trx-expand">
+                                <i data-lucide="chevron-down" class="expand-icon"></i>
+                            </div>
                         </div>
-                        <div class="trx-middle">
-                            <span class="badge-success">✓ Berhasil</span>
-                        </div>
-                        <div class="trx-right">
-                            <div class="trx-amount">Rp <?= number_format($trx['total_amount']); ?></div>
-                            <div class="trx-payment text-muted">
-                                Tunai: Rp <?= number_format($trx['payment_received']); ?>
+                        
+                        <!-- Detail Produk -->
+                        <div class="trx-details">
+                            <div class="items-list">
+                                <?php foreach ($trx['items'] as $item) : ?>
+                                    <div class="item-row">
+                                        <span class="item-name"><?= htmlspecialchars($item['product_name']); ?></span>
+                                        <span class="item-qty"><?= $item['quantity']; ?>x</span>
+                                        <span class="item-price">Rp <?= number_format($item['subtotal']); ?></span>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -72,18 +90,36 @@
                         </h3>
                         <div class="transaction-list">
                             <?php foreach ($transactions as $trx) : ?>
-                                <div class="trx-card trx-past">
-                                    <div class="trx-left">
-                                        <div class="trx-time"><?= date('H:i', strtotime($trx['transaction_time'])); ?></div>
-                                        <div class="trx-id">#<?= $trx['transaction_id']; ?></div>
+                                <div class="trx-card trx-past" data-trx-id="<?= $trx['transaction_id']; ?>">
+                                    <div class="trx-header" onclick="toggleTransactionDetails(this)">
+                                        <div class="trx-left">
+                                            <div class="trx-time"><?= date('H:i', strtotime($trx['transaction_time'])); ?></div>
+                                            <div class="trx-id">#<?= $trx['transaction_id']; ?></div>
+                                        </div>
+                                        <div class="trx-middle">
+                                            <span class="badge-success">✓ Berhasil</span>
+                                        </div>
+                                        <div class="trx-right">
+                                            <div class="trx-amount">Rp <?= number_format($trx['total_amount']); ?></div>
+                                            <div class="trx-payment text-muted">
+                                                Tunai: Rp <?= number_format($trx['payment_received']); ?>
+                                            </div>
+                                        </div>
+                                        <div class="trx-expand">
+                                            <i data-lucide="chevron-down" class="expand-icon"></i>
+                                        </div>
                                     </div>
-                                    <div class="trx-middle">
-                                        <span class="badge-success">✓ Berhasil</span>
-                                    </div>
-                                    <div class="trx-right">
-                                        <div class="trx-amount">Rp <?= number_format($trx['total_amount']); ?></div>
-                                        <div class="trx-payment text-muted">
-                                            Tunai: Rp <?= number_format($trx['payment_received']); ?>
+                                    
+                                    <!-- Detail Produk -->
+                                    <div class="trx-details">
+                                        <div class="items-list">
+                                            <?php foreach ($trx['items'] as $item) : ?>
+                                                <div class="item-row">
+                                                    <span class="item-name"><?= htmlspecialchars($item['product_name']); ?></span>
+                                                    <span class="item-qty"><?= $item['quantity']; ?>x</span>
+                                                    <span class="item-price">Rp <?= number_format($item['subtotal']); ?></span>
+                                                </div>
+                                            <?php endforeach; ?>
                                         </div>
                                     </div>
                                 </div>

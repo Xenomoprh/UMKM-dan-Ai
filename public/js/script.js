@@ -202,28 +202,52 @@ document.addEventListener('DOMContentLoaded', function () {
                     postData.append('payment_received', payment);
                     postData.append('payment_change', changeAmount);
 
-                    fetch(BASEURL + '/kasir/prosesTransaksi', {
+                    console.log('Cart data:', cart);
+                    console.log('Cart JSON:', JSON.stringify(cart));
+                    console.log('POST data:', postData.toString());
+                    console.log('URL:', BASEURL + '/index.php/kasir/prosesTransaksi');
+                    
+                    fetch(BASEURL + '/index.php/kasir/prosesTransaksi', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: postData.toString()
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            // Tampilkan modal dengan detail pembayaran
-                            showPaymentModal(currentTotal, payment, changeAmount);
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            console.error('HTTP Error:', response.statusText);
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.text();
+                    })
+                    .then(responseText => {
+                        console.log('Response text:', responseText);
+                        try {
+                            const data = JSON.parse(responseText);
+                            console.log('Parsed data:', data);
                             
-                            // Reset cart setelah pembayaran
-                            cart = {};
-                            paymentAmountInput.value = ''; 
-                            updateCartView();
-                        } else {
-                            alert(data.message || 'Pembayaran gagal!');
+                            if (data.status === 'success') {
+                                // Tampilkan modal dengan detail pembayaran
+                                showPaymentModal(currentTotal, payment, changeAmount);
+                                
+                                // Reset cart setelah pembayaran
+                                cart = {};
+                                paymentAmountInput.value = ''; 
+                                updateCartView();
+                            } else {
+                                alert(data.message || 'Pembayaran gagal!');
+                            }
+                        } catch (parseError) {
+                            console.error('JSON Parse error:', parseError);
+                            console.error('Response was:', responseText.substring(0, 500));
+                            alert('Server Error: Response tidak valid JSON\n\n' + responseText.substring(0, 200));
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat menghubungi server.');
+                        console.error('Fetch error:', error);
+                        console.error('Error message:', error.message);
+                        console.error('Error stack:', error.stack);
+                        alert('Terjadi kesalahan saat menghubungi server:\n' + error.message);
                     });
                 });
             }
@@ -378,4 +402,354 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleHistoryBtn.classList.toggle('open');
         });
     }
+
+    // Toggle transaction details
+    function toggleTransactionDetails(element) {
+        const card = element.closest('.trx-card');
+        const details = card.querySelector('.trx-details');
+        const icon = card.querySelector('.expand-icon');
+
+        if (details) {
+            details.classList.toggle('hidden');
+            icon.style.transform = details.classList.contains('hidden') 
+                ? 'rotate(0deg)' 
+                : 'rotate(180deg)';
+        }
+    }
+
+    // ====================================================================
+    // LOGIKA UNTUK EDIT PRODUK & KATEGORI (HALAMAN KASIR)
+    // ====================================================================
+    // Hitung BASEURL dengan benar
+    // Ambil URL saat ini dan hilangkan path yang tidak perlu
+    // Contoh: http://localhost:8080/Proyek_UMKM/public/kasir -> http://localhost:8080/Proyek_UMKM/public
+    const currentPathname = window.location.pathname;
+    let BASEURL;
+    
+    // Jika URL berakhir dengan /kasir atau /kasir/, hapus kasir dari path
+    if (currentPathname.endsWith('/kasir')) {
+        BASEURL = window.location.origin + currentPathname.replace('/kasir', '');
+    } else if (currentPathname.endsWith('/kasir/')) {
+        BASEURL = window.location.origin + currentPathname.replace('/kasir/', '');
+    } else {
+        // Default: ambil path sampai public folder
+        const pathArray = currentPathname.split('/').filter(x => x);
+        BASEURL = window.location.origin + '/' + pathArray.slice(0, -1).join('/');
+    }
+    
+    console.log('Current pathname:', currentPathname);
+    console.log('BASEURL:', BASEURL);
+    console.log('API Endpoint akan ke:', BASEURL + '/index.php/kasir/addProduct');
+    
+    // Modal Elements
+    const productModal = document.getElementById('product-modal');
+    const productForm = document.getElementById('product-form');
+    const btnAddProduct = document.getElementById('btn-add-product');
+    const btnEditProduct = document.querySelectorAll('.btn-edit-product');
+    const btnDeleteProduct = document.querySelectorAll('.btn-delete-product');
+    const productModalClose = document.getElementById('product-modal-close');
+    const productModalCancel = document.getElementById('product-modal-cancel');
+    const productModalSave = document.getElementById('product-modal-save');
+    const categoryModal = document.getElementById('category-modal');
+    const btnManageCategories = document.getElementById('btn-manage-categories');
+    const categoryModalClose = document.getElementById('category-modal-close');
+    const categoryModalDone = document.getElementById('category-modal-done');
+
+    // ====================================================================
+    // Toggle untuk Show/Hide Edit & Delete Buttons
+    // ====================================================================
+    const toggleEditDelete = document.getElementById('toggle-edit-delete');
+    
+    if (toggleEditDelete) {
+        // Load state dari localStorage
+        const isVisible = localStorage.getItem('showEditDeleteButtons') === 'true';
+        toggleEditDelete.checked = isVisible;
+        updateProductActionsVisibility(isVisible);
+        
+        // Event listener untuk toggle
+        toggleEditDelete.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            localStorage.setItem('showEditDeleteButtons', isChecked);
+            updateProductActionsVisibility(isChecked);
+        });
+    }
+    
+    // Function untuk update visibility product-actions
+    function updateProductActionsVisibility(isVisible) {
+        const productActions = document.querySelectorAll('.product-actions');
+        productActions.forEach(actions => {
+            if (isVisible) {
+                actions.classList.add('visible');
+            } else {
+                actions.classList.remove('visible');
+            }
+        });
+        
+        // Re-render lucide icons setelah visibility berubah
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+
+    if (btnAddProduct) {
+        // Event untuk membuka modal tambah produk
+        btnAddProduct.addEventListener('click', () => {
+            document.getElementById('product-modal-title').textContent = 'Tambah Produk Baru';
+            productForm.reset();
+            document.getElementById('product-id').value = '';
+            productModal.classList.remove('hidden');
+        });
+
+        // Event untuk menutup modal produk
+        const closeProductModal = () => {
+            productModal.classList.add('hidden');
+            productForm.reset();
+        };
+
+        if (productModalClose) productModalClose.addEventListener('click', closeProductModal);
+        if (productModalCancel) productModalCancel.addEventListener('click', closeProductModal);
+
+        // Event untuk menutup modal saat klik di luar
+        productModal.addEventListener('click', (e) => {
+            if (e.target === productModal) {
+                closeProductModal();
+            }
+        });
+
+        // Event untuk menyimpan produk
+        if (productModalSave) {
+            productModalSave.addEventListener('click', async () => {
+                const productId = document.getElementById('product-id').value;
+                const isEditing = productId !== '';
+
+                const formData = {
+                    product_id: productId,
+                    product_name: document.getElementById('product-name').value,
+                    kategori: document.getElementById('product-category').value,
+                    price: parseFloat(document.getElementById('product-price').value),
+                    cost_of_goods: parseFloat(document.getElementById('product-cost').value) || 0,
+                    stock_quantity: parseInt(document.getElementById('product-stock').value) || 0
+                };
+
+                if (!formData.product_name || !formData.kategori || !formData.price) {
+                    alert('Harap isi semua field yang diperlukan (*)');
+                    return;
+                }
+
+                const endpoint = isEditing ? 'editProduct' : 'addProduct';
+                const url = `${BASEURL}/index.php/kasir/${endpoint}`;
+                
+                console.log('Sending to:', url);
+                console.log('FormData:', formData);
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    console.log('Response status:', response.status);
+                    const responseText = await response.text();
+                    console.log('Response text:', responseText);
+                    
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (parseError) {
+                        console.error('JSON Parse Error:', parseError);
+                        console.error('Response was:', responseText);
+                        alert('Server Error: Response bukan JSON.\n\nResponse: ' + responseText.substring(0, 200));
+                        return;
+                    }
+                    
+                    console.log('API Response:', result);
+
+                    if (result.status) {
+                        alert(result.message || 'Produk berhasil disimpan');
+                        closeProductModal();
+                        // Reload halaman untuk menampilkan perubahan
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (result.message || 'Gagal menyimpan produk'));
+                    }
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                    alert('Terjadi kesalahan saat menyimpan produk: ' + error.message);
+                }
+            });
+        }
+
+        // Event untuk tombol edit produk
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-edit-product')) {
+                const btn = e.target.closest('.btn-edit-product');
+                const productId = btn.getAttribute('data-id');
+                
+                // Ambil data produk dari product-card-main
+                const productCard = btn.closest('.product-card');
+                const productCardMain = productCard.querySelector('.product-card-main');
+                const productName = productCardMain.getAttribute('data-name');
+                const productPrice = productCardMain.getAttribute('data-price');
+
+                // Isi form dengan data produk
+                document.getElementById('product-id').value = productId;
+                document.getElementById('product-name').value = productName;
+                document.getElementById('product-price').value = productPrice;
+
+                // Tentukan kategori berdasarkan data-category di parent
+                const category = productCard.getAttribute('data-category');
+                let categoryValue = '';
+                if (category === 'makanan') categoryValue = 'Jajanan & Makanan';
+                else if (category === 'minuman') categoryValue = 'Minuman';
+                else categoryValue = 'Lainnya';
+
+                document.getElementById('product-category').value = categoryValue;
+                document.getElementById('product-cost').value = '0';
+                document.getElementById('product-stock').value = '0';
+
+                document.getElementById('product-modal-title').textContent = 'Edit Produk';
+                productModal.classList.remove('hidden');
+            }
+        });
+
+        // Event untuk tombol delete produk
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-delete-product')) {
+                const btn = e.target.closest('.btn-delete-product');
+                const productId = btn.getAttribute('data-id');
+                const productCard = btn.closest('.product-card');
+                const productName = productCard.querySelector('.product-card-name').textContent;
+
+                if (confirm(`Apakah Anda yakin ingin menghapus produk "${productName}"?`)) {
+                    deleteProduct(productId);
+                }
+            }
+        });
+    }
+
+    // Fungsi untuk menghapus produk
+    async function deleteProduct(productId) {
+        try {
+            const response = await fetch(`${BASEURL}/index.php/kasir/deleteProduct`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId })
+            });
+
+            const result = await response.json();
+
+            if (result.status) {
+                alert(result.message || 'Produk berhasil dihapus');
+                location.reload();
+            } else {
+                alert('Error: ' + (result.message || 'Gagal menghapus produk'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus produk');
+        }
+    }
+
+    // Event untuk manage categories
+    if (btnManageCategories) {
+        btnManageCategories.addEventListener('click', () => {
+            loadCategories();
+            categoryModal.classList.remove('hidden');
+        });
+
+        const closeCategoryModal = () => {
+            categoryModal.classList.add('hidden');
+        };
+
+        if (categoryModalClose) categoryModalClose.addEventListener('click', closeCategoryModal);
+        if (categoryModalDone) categoryModalDone.addEventListener('click', closeCategoryModal);
+
+        categoryModal.addEventListener('click', (e) => {
+            if (e.target === categoryModal) {
+                closeCategoryModal();
+            }
+        });
+
+        // Event untuk tombol add category
+        const btnAddCategory = document.getElementById('btn-add-category');
+        if (btnAddCategory) {
+            btnAddCategory.addEventListener('click', async () => {
+                const newCategoryInput = document.getElementById('new-category');
+                const newCategory = newCategoryInput.value.trim();
+
+                if (!newCategory) {
+                    alert('Nama kategori tidak boleh kosong');
+                    return;
+                }
+
+                // Validasi: kategori sudah ada atau tidak
+                const categoryList = document.getElementById('category-list');
+                const existingCategories = Array.from(categoryList.querySelectorAll('.category-item span'))
+                    .map(el => el.textContent);
+
+                if (existingCategories.includes(newCategory)) {
+                    alert('Kategori ini sudah ada');
+                    return;
+                }
+
+                // Tambahkan kategori ke UI
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `
+                    <span>${newCategory}</span>
+                    <button class="btn-delete-category" type="button">Hapus</button>
+                `;
+
+                categoryList.appendChild(categoryItem);
+                newCategoryInput.value = '';
+
+                // Update select options di form produk
+                const categorySelect = document.getElementById('product-category');
+                const option = document.createElement('option');
+                option.value = newCategory;
+                option.textContent = newCategory;
+                categorySelect.appendChild(option);
+
+                // Event delete untuk kategori baru
+                categoryItem.querySelector('.btn-delete-category').addEventListener('click', (e) => {
+                    categoryItem.remove();
+                    // Remove dari select juga
+                    const opts = categorySelect.querySelectorAll('option');
+                    opts.forEach(opt => {
+                        if (opt.value === newCategory) opt.remove();
+                    });
+                });
+            });
+        }
+    }
+
+    // Fungsi untuk load categories
+    function loadCategories() {
+        const categoryList = document.getElementById('category-list');
+        categoryList.innerHTML = '';
+
+        // Default categories
+        const defaultCategories = ['Jajanan & Makanan', 'Minuman', 'Lainnya'];
+        
+        defaultCategories.forEach(category => {
+            const categoryItem = document.createElement('div');
+            categoryItem.className = 'category-item';
+            categoryItem.innerHTML = `
+                <span>${category}</span>
+                <button class="btn-delete-category" type="button" disabled title="Kategori default tidak bisa dihapus">Hapus</button>
+            `;
+            
+            const deleteBtn = categoryItem.querySelector('.btn-delete-category');
+            deleteBtn.style.opacity = '0.5';
+            deleteBtn.style.cursor = 'not-allowed';
+
+            categoryList.appendChild(categoryItem);
+        });
+    }
+
 });

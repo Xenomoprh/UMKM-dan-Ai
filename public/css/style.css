@@ -281,12 +281,44 @@ main, .content, .page-content {
     transition: all 0.2s ease-in-out;
     min-height: 100px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
 }
 
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     border-color: #007bff;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0) 0%, rgba(0, 123, 255, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover::before {
+    opacity: 1;
+}
+
+.product-card-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.product-card:hover .product-card-main {
+    transform: translateY(-2px);
 }
 
 .product-card-icon {
@@ -313,6 +345,75 @@ main, .content, .page-content {
     font-size: 0.9em;
     color: #555;
     font-weight: 700;
+}
+
+.product-card .product-actions {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    gap: 6px;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+/* When toggle is ON (visible class), show on hover normally */
+.product-card .product-actions.visible {
+    display: flex;
+}
+
+.product-card:hover .product-actions.visible {
+    display: flex;
+    opacity: 1;
+}
+
+/* When toggle is OFF (no visible class), hide regardless of hover */
+.product-card:hover .product-actions:not(.visible) {
+    display: none;
+}
+
+.btn-edit-product,
+.btn-delete-product {
+    padding: 6px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    font-size: 18px;
+}
+
+.btn-label {
+    display: none;
+}
+
+.btn-edit-product {
+    color: #3498db;
+    border-left: 3px solid #3498db;
+}
+
+.btn-edit-product:hover {
+    background-color: #3498db;
+    transform: scale(1.15);
+    border-left-color: #2980b9;
+}
+
+.btn-delete-product {
+    color: #e74c3c;
+    border-left: 3px solid #e74c3c;
+}
+
+.btn-delete-product:hover {
+    background-color: #e74c3c;
+    transform: scale(1.15);
+    border-left-color: #c0392b;
 }
 
 .mt-4 {
@@ -369,28 +470,6 @@ main, .content, .page-content {
     width: 28px;
     height: 28px;
     color: #007bff;
-}
-
-/* Product Card Enhancement */
-.product-card {
-    position: relative;
-    overflow: hidden;
-}
-
-.product-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(0, 123, 255, 0) 0%, rgba(0, 123, 255, 0.1) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.product-card:hover::before {
-    opacity: 1;
 }
 
 /* Cart Styling - Modern & Clean */
@@ -1223,12 +1302,22 @@ main, .content, .page-content {
     border-left: 4px solid #007bff;
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap;
 }
 
 .trx-card:hover {
     transform: translateX(5px);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     background: #fff;
+}
+
+.trx-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    gap: 10px;
 }
 
 .trx-left {
@@ -1278,6 +1367,82 @@ main, .content, .page-content {
     font-size: 0.85rem;
     color: #7f8c8d;
     margin-top: 4px;
+}
+
+.trx-expand {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-icon {
+    width: 20px;
+    height: 20px;
+    color: #007bff;
+    transition: transform 0.3s ease;
+}
+
+.trx-card[open] .expand-icon {
+    transform: rotate(180deg);
+}
+
+/* Transaction Details */
+.trx-details {
+    width: 100%;
+    background: #f0f0f0;
+    border-radius: 6px;
+    margin-top: 12px;
+    padding: 0;
+    max-height: 500px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border-top: 2px solid #ddd;
+}
+
+.trx-details.hidden {
+    max-height: 0;
+    padding: 0;
+    margin-top: 0;
+}
+
+.items-list {
+    padding: 15px 20px;
+}
+
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.item-row:last-child {
+    border-bottom: none;
+}
+
+.item-name {
+    flex: 1;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.item-qty {
+    flex: 0 0 auto;
+    color: #7f8c8d;
+    margin: 0 15px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.item-price {
+    flex: 0 0 auto;
+    color: #27ae60;
+    font-weight: 600;
+    text-align: right;
+    min-width: 120px;
 }
 
 .text-muted {
@@ -1432,5 +1597,291 @@ main, .content, .page-content {
 
     .btn-toggle-history {
         font-size: 0.95rem;
+    }
+}
+
+/* ==================================================================== */
+/* EDIT PRODUK & KATEGORI - MANAGE PRODUCTS BAR */
+/* ==================================================================== */
+
+.manage-products-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.btn-add-product,
+.btn-manage-categories {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add-product {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-add-product:hover {
+    background-color: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-manage-categories {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-manage-categories:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Toggle untuk Show/Hide Edit & Delete Buttons */
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 15px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    min-width: fit-content;
+}
+
+.toggle-label:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.toggle-checkbox:checked + .toggle-slider {
+    background-color: #27ae60;
+}
+
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-slider::after {
+    left: 22px;
+}
+
+.toggle-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* ==================================================================== */
+/* MODAL FORM STYLING */
+/* ==================================================================== */
+
+.modal-form {
+    max-width: 500px;
+    width: 90%;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #bbb;
+}
+
+/* Category List dalam Modal */
+.category-list {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: white;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border-left: 3px solid #3498db;
+}
+
+.category-item span {
+    font-weight: 500;
+    color: #333;
+}
+
+.btn-delete-category {
+    padding: 4px 8px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.btn-delete-category:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Add Category Input */
+.add-category-input {
+    display: flex;
+    gap: 8px;
+}
+
+.add-category-input input {
+    flex: 1;
+}
+
+.btn-add-category {
+    padding: 10px 20px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-add-category:hover {
+    background-color: #229954;
+    transform: translateY(-2px);
+}
+
+/* Modal Footer Buttons */
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-cancel,
+.btn-save,
+.btn-close-modal {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.btn-cancel,
+.btn-close-modal {
+    background-color: #ecf0f1;
+    color: #333;
+}
+
+.btn-cancel:hover,
+.btn-close-modal:hover {
+    background-color: #d5dbdb;
+}
+
+.btn-save {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Modal hidden state */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive untuk manage-products-bar */
+@media (max-width: 768px) {
+    .manage-products-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-add-product,
+    .btn-manage-categories {
+        width: 100%;
+    }
+
+    .modal-form {
+        max-width: 90%;
     }
 }

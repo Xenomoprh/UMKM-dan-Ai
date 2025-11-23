@@ -36,12 +36,23 @@ class App {
     }
 
     public function parseURL() {
+        // First try to get URL from query string
         if (isset($_GET['url'])) {
             $url = rtrim($_GET['url'], '/');
             $url = filter_var($url, FILTER_SANITIZE_URL);
             $url = explode('/', $url);
             return $url;
         }
+        
+        // If not in query string, try to get from PATH_INFO (for URLs like /index.php/controller/method)
+        if (isset($_SERVER['PATH_INFO'])) {
+            $url = rtrim($_SERVER['PATH_INFO'], '/');
+            $url = filter_var($url, FILTER_SANITIZE_URL);
+            $url = explode('/', $url);
+            $url = array_filter($url); // Remove empty values
+            return array_values($url);
+        }
+        
         return [];
     }
 }
