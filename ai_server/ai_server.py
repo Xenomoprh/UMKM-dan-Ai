@@ -46,8 +46,10 @@ try:
     genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
     
     # Membuat model (Cara yang benar untuk library baru)
-    model = genai.GenerativeModel(model_name='gemini-2.0-flash')
+    #model = genai.GenerativeModel(model_name='gemini-2.0-flash')
     
+    model = genai.GenerativeModel(model_name='gemini-2.5-flash')
+
     print("--- 3. Konfigurasi Gemini (GenerativeModel) Berhasil ---")
 except Exception as e:
     print(f"!!! GAGAL KONFIGURASI GEMINI: {e}")

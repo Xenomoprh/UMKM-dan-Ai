@@ -287,10 +287,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const messageWrapper = document.createElement('div');
             messageWrapper.className = `chat-message ${type}`;
             if (isTyping) messageWrapper.id = 'typing-indicator';
+            
             const messageBubble = document.createElement('div');
             messageBubble.className = 'message-bubble';
-            const formattedMessage = message.replace(/\n/g, '<br>');
-            messageBubble.innerHTML = `<p>${formattedMessage}</p>`;
+            
+            // LOGIKA BARU: Menggunakan Marked.js untuk pesan AI
+            // Cek apakah pesan ini dari AI ('ai-message') DAN library 'marked' sudah termuat
+            if (type === 'ai-message' && typeof marked !== 'undefined' && !isTyping) {
+                // Gunakan marked.parse() untuk mengubah Markdown (tabel/bold) menjadi HTML
+                messageBubble.innerHTML = marked.parse(message);
+            } else {
+                // Untuk pesan pengguna atau loading, gunakan teks biasa
+                const formattedMessage = message.replace(/\n/g, '<br>');
+                messageBubble.innerHTML = `<p>${formattedMessage}</p>`;
+            }
+
             messageWrapper.appendChild(messageBubble);
             chatBox.appendChild(messageWrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -353,5 +364,18 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         chatForm.addEventListener('submit', sendMessage);
         loadHistory();
+    }
+
+    // ====================================================================
+    // LOGIKA UNTUK HALAMAN HISTORY
+    // ====================================================================
+    const toggleHistoryBtn = document.getElementById('btn-toggle-history');
+    const historyContent = document.getElementById('history-content');
+
+    if (toggleHistoryBtn && historyContent) {
+        toggleHistoryBtn.addEventListener('click', function() {
+            historyContent.classList.toggle('hidden');
+            toggleHistoryBtn.classList.toggle('open');
+        });
     }
 });

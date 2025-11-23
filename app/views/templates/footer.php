@@ -4,6 +4,8 @@
     </script>
     
     <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script src="<?= BASEURL; ?>/js/script.js"></script>
 

@@ -67,4 +67,10 @@ class Transaction_model {
             return false; // Gagal
         }
     }
+
+    public function getAllTransactions() {
+        // Ambil semua transaksi diurutkan dari yang terbaru (DESC)
+        $this->db->query('SELECT * FROM transactions ORDER BY transaction_time DESC');
+        return $this->db->resultSet();
+    }
 }
