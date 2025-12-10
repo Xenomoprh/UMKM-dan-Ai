@@ -1,7 +1,4 @@
 <?php
-
-// File: app/core/Database.php (Versi Baru)
-
 class Database {
     private $host = DB_HOST;
     private $user = DB_USER;

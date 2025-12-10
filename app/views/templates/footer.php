@@ -10,7 +10,9 @@
     <script src="<?= BASEURL; ?>/js/script.js"></script>
 
     <script>
-      lucide.createIcons();
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
     </script>
 </body>
 </html>

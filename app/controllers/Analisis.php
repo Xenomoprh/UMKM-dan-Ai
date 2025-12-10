@@ -34,7 +34,7 @@ class Analisis extends Controller {
             
             // Tambahkan Timeout agar PHP tidak hang
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // Waktu tunggu koneksi 5 detik
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Total waktu eksekusi 15 detik
+            curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Total waktu eksekusi 60 detik
 
             // 3. Eksekusi dan dapatkan balasan dari Python
             $result = curl_exec($ch);
@@ -49,10 +49,23 @@ class Analisis extends Controller {
                 exit;
             }
 
-            // 5. Tutup cURL dan kirimkan balasan (yang sudah JSON)
+            // 5. Tutup cURL dan dekode hasilnya
             curl_close($ch);
+            $response_data = json_decode($result, true);
+
+            // 6. Validasi balasan dari Python
+            // Jika $result bukan JSON valid, $response_data akan null.
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // Kirim pesan error yang lebih informatif ke JavaScript
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'answer' => 'Error: Server AI memberikan balasan yang tidak valid (bukan JSON). Ini mungkin karena error internal di server AI.',
+                    'details' => substr(strip_tags($result), 0, 500) // Kirim potongan kecil dari respons untuk debug
+                ]);
+                exit;
+            }
             
-            // Set header JSON dan kirimkan hasilnya langsung ke JavaScript
+            // 7. Kirimkan balasan (yang sudah pasti JSON) ke JavaScript
             header('Content-Type: application/json');
             echo $result;
 

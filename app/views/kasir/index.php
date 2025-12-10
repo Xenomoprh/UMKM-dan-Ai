@@ -28,103 +28,41 @@
                 </label>
             </div>
             
-            <!-- Kategori: Jajanan & Makanan -->
-            <div class="category-section">
-                <div class="category-header">
-                    <i data-lucide="utensils" class="category-icon"></i>
-                    <h2>Jajanan & Makanan</h2>
-                </div>
-                <div class="product-grid">
-                    <?php foreach ($data['makanan'] as $product) : ?>
-                        <div class="product-card" data-category="makanan">
-                            <div class="product-card-main add-to-cart-btn" 
-                                 data-id="<?= $product['product_id']; ?>"
-                                 data-name="<?= $product['product_name']; ?>"
-                                 data-price="<?= $product['price']; ?>"
-                                 title="Klik untuk tambah ke keranjang">
-                                
-                                <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                                <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                                <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
-                                    ✏️
-                                </button>
-                                <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
-                                    🗑️
-                                </button>
-                            </div>
+            <!-- Kategori Dinamis -->
+            <?php foreach ($data['categories'] as $kategori => $categoryData) : ?>
+                <?php if (!empty($categoryData['products'])) : ?>
+                    <div class="category-section">
+                        <div class="category-header">
+                            <i data-lucide="<?= htmlspecialchars($categoryData['icon']); ?>" class="category-icon"></i>
+                            <h2><?= htmlspecialchars($categoryData['name']); ?></h2>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <!-- Kategori: Minuman -->
-            <div class="category-section">
-                <div class="category-header">
-                    <i data-lucide="coffee" class="category-icon"></i>
-                    <h2>Minuman</h2>
-                </div>
-                <div class="product-grid">
-                    <?php foreach ($data['minuman'] as $product) : ?>
-                        <div class="product-card" data-category="minuman">
-                            <div class="product-card-main add-to-cart-btn" 
-                                 data-id="<?= $product['product_id']; ?>"
-                                 data-name="<?= $product['product_name']; ?>"
-                                 data-price="<?= $product['price']; ?>"
-                                 title="Klik untuk tambah ke keranjang">
-                                
-                                <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                                <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                                <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
-                                    ✏️
-                                </button>
-                                <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
-                                    🗑️
-                                </button>
-                            </div>
+                        <div class="product-grid">
+                            <?php foreach ($categoryData['products'] as $product) : ?>
+                                <div class="product-card" data-category="<?= htmlspecialchars(strtolower(str_replace(' ', '-', $kategori))); ?>">
+                                    <div class="product-card-main add-to-cart-btn" 
+                                         data-id="<?= $product['product_id']; ?>"
+                                         data-name="<?= $product['product_name']; ?>"
+                                         data-price="<?= $product['price']; ?>"
+                                         title="Klik untuk tambah ke keranjang">
+                                        
+                                        <i data-lucide="<?= htmlspecialchars($product['icon'] ?? 'package'); ?>" class="product-card-icon"></i>
+                                        <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
+                                        <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
+                                    </div>
+                                    <div class="product-actions">
+                                        <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
+                                            ✏️
+                                        </button>
+                                        <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-
-            <!-- Kategori: Lainnya (jika ada) -->
-            <?php if (!empty($data['lainnya'])) : ?>
-                <div class="category-section">
-                    <div class="category-header">
-                        <i data-lucide="package" class="category-icon"></i>
-                        <h2>Lainnya</h2>
                     </div>
-                    <div class="product-grid">
-                        <?php foreach ($data['lainnya'] as $product) : ?>
-                            <div class="product-card" data-category="lainnya">
-                                <div class="product-card-main add-to-cart-btn" 
-                                     data-id="<?= $product['product_id']; ?>"
-                                     data-name="<?= $product['product_name']; ?>"
-                                     data-price="<?= $product['price']; ?>"
-                                     title="Klik untuk tambah ke keranjang">
-                                    
-                                    <i data-lucide="<?= $product['icon']; ?>" class="product-card-icon"></i>
-                                    <span class="product-card-name"><?= htmlspecialchars($product['product_name']); ?></span>
-                                    <span class="product-card-price">Rp <?= number_format($product['price']); ?></span>
-                                </div>
-                                <div class="product-actions">
-                                    <button class="btn-edit-product" data-id="<?= $product['product_id']; ?>" title="Edit Produk" aria-label="Edit">
-                                        ✏️
-                                    </button>
-                                    <button class="btn-delete-product" data-id="<?= $product['product_id']; ?>" title="Hapus Produk" aria-label="Hapus">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            <?php endforeach; ?>
 
         </div>
 

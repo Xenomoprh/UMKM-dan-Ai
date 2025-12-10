@@ -7,36 +7,59 @@ class Kasir extends Controller {
         $data['judul'] = 'Halaman Kasir';
 
         // 1. Ambil semua produk dari model
-        $allProducts = $this->model('Product_model')->getAllProducts();
+        $productModel = $this->model('Product_model');
+        $allProducts = $productModel->getAllProducts();
 
-        // 2. Siapkan array untuk kategori (INI BAGIAN PENTING YANG MEMPERBAIKI ERROR)
-        // Kita harus membuat array kosong ini terlebih dahulu.
-        $data['makanan'] = [];
-        $data['minuman'] = [];
-        $data['lainnya'] = [];
+        // 2. Siapkan array untuk kategori DINAMIS (menggunakan kategori yang ada)
+        $data['categories'] = [];
 
-        // 3. Logika untuk memisahkan produk berdasarkan kategori
-        // Ini adalah cara sederhana tanpa mengubah database
+        // 3. Logika untuk memisahkan produk berdasarkan kategori DINAMIS
         if (!empty($allProducts)) {
             foreach ($allProducts as $product) {
-                $namaProduk = strtolower($product['product_name']);
+                $kategori = trim($product['kategori'] ?? 'Lainnya');
                 
-                // Tentukan kategori dan ikon
-                if (str_contains($namaProduk, 'teh') || str_contains($namaProduk, 'kopi') || str_contains($namaProduk, 'es jeruk') || str_contains($namaProduk, 'air mineral')) {
-                    $product['icon'] = 'coffee'; // Ikon untuk minuman
-                    $data['minuman'][] = $product;
-                } elseif (str_contains($namaProduk, 'bakwan') || str_contains($namaProduk, 'tahu') || str_contains($namaProduk, 'risol') || str_contains($namaProduk, 'pisang') || str_contains($namaProduk, 'onde') || str_contains($namaProduk, 'kue') || str_contains($namaProduk, 'lemper') || str_contains($namaProduk, 'dadar') || str_contains($namaProduk, 'bika')) {
-                    $product['icon'] = 'utensils-crossed'; // Ikon untuk makanan
-                    $data['makanan'][] = $product;
-                } else {
-                    $product['icon'] = 'package'; // Ikon default
-                    $data['lainnya'][] = $product;
+                // Inisialisasi kategori jika belum ada
+                if (!isset($data['categories'][$kategori])) {
+                    $data['categories'][$kategori] = [
+                        'name' => $kategori,
+                        'icon' => $this->getIconForCategory($kategori),
+                        'products' => []
+                    ];
                 }
+                
+                // Tambahkan icon ke produk
+                $product['icon'] = $this->getIconForProduct($kategori);
+                $data['categories'][$kategori]['products'][] = $product;
             }
         }
 
-        // 4. Muat view dan kirimkan data yang sudah dikategorikan
-        // Sekarang $data['makanan'] dan $data['minuman'] dijamin ada (meskipun kosong)
+        // 4. Urutkan kategori: prioritas Jajanan & Makanan, Minuman, lalu kategori lain, Lainnya di bawah
+        $sortedCategories = [];
+        $lainnyaCategory = null;
+        $priorityOrder = ['Jajanan & Makanan', 'Minuman'];
+        
+        // Tambahkan kategori prioritas dulu
+        foreach ($priorityOrder as $priority) {
+            if (isset($data['categories'][$priority])) {
+                $sortedCategories[$priority] = $data['categories'][$priority];
+            }
+        }
+        
+        // Tambahkan kategori lainnya (yang bukan prioritas dan bukan Lainnya)
+        foreach ($data['categories'] as $key => $cat) {
+            if (!in_array($key, $priorityOrder) && $key !== 'Lainnya') {
+                $sortedCategories[$key] = $cat;
+            }
+        }
+        
+        // Tambahkan Lainnya di paling bawah
+        if (isset($data['categories']['Lainnya'])) {
+            $sortedCategories['Lainnya'] = $data['categories']['Lainnya'];
+        }
+        
+        $data['categories'] = $sortedCategories;
+
+        // 5. Muat view dan kirimkan data yang sudah dikategorikan
         $this->view('kasir/index', $data);
     }
 
@@ -211,5 +234,43 @@ class Kasir extends Controller {
         }
         echo json_encode(['status' => false, 'message' => 'Method tidak diizinkan']);
         exit;
+    }
+
+    /**
+     * Helper method untuk mendapatkan icon kategori
+     */
+    private function getIconForCategory($kategori) {
+        $icons = [
+            'Jajanan & Makanan' => 'utensils',
+            'Minuman' => 'coffee',
+            'Makanan' => 'utensils',
+            'Makan' => 'utensils',
+            'Snack' => 'cookie',
+            'Minuman Panas' => 'flame',
+            'Minuman Dingin' => 'ice-cream',
+            'Dessert' => 'cake',
+            'Kue' => 'cake'
+        ];
+        
+        return $icons[$kategori] ?? 'package';
+    }
+
+    /**
+     * Helper method untuk mendapatkan icon produk berdasarkan kategori
+     */
+    private function getIconForProduct($kategori) {
+        $icons = [
+            'Jajanan & Makanan' => 'utensils-crossed',
+            'Minuman' => 'coffee',
+            'Makanan' => 'utensils-crossed',
+            'Makan' => 'utensils-crossed',
+            'Snack' => 'cookie',
+            'Minuman Panas' => 'flame',
+            'Minuman Dingin' => 'ice-cream',
+            'Dessert' => 'cake',
+            'Kue' => 'cake'
+        ];
+        
+        return $icons[$kategori] ?? 'package';
     }
 }

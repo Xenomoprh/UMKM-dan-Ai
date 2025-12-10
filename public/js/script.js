@@ -417,29 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ====================================================================
-    // LOGIKA UNTUK EDIT PRODUK & KATEGORI (HALAMAN KASIR)
-    // ====================================================================
-    // Hitung BASEURL dengan benar
-    // Ambil URL saat ini dan hilangkan path yang tidak perlu
-    // Contoh: http://localhost:8080/Proyek_UMKM/public/kasir -> http://localhost:8080/Proyek_UMKM/public
-    const currentPathname = window.location.pathname;
-    let BASEURL;
-    
-    // Jika URL berakhir dengan /kasir atau /kasir/, hapus kasir dari path
-    if (currentPathname.endsWith('/kasir')) {
-        BASEURL = window.location.origin + currentPathname.replace('/kasir', '');
-    } else if (currentPathname.endsWith('/kasir/')) {
-        BASEURL = window.location.origin + currentPathname.replace('/kasir/', '');
-    } else {
-        // Default: ambil path sampai public folder
-        const pathArray = currentPathname.split('/').filter(x => x);
-        BASEURL = window.location.origin + '/' + pathArray.slice(0, -1).join('/');
-    }
-    
-    console.log('Current pathname:', currentPathname);
-    console.log('BASEURL:', BASEURL);
-    console.log('API Endpoint akan ke:', BASEURL + '/index.php/kasir/addProduct');
+
     
     // Modal Elements
     const productModal = document.getElementById('product-modal');
